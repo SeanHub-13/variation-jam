@@ -93,6 +93,8 @@ let endGoose = {
 
 //Holds all information the enemy functions might need
 let enemyInfo = {
+    //Array holding 2 enemy choices
+    enemy: [1, 2],
     //Boolean variable for whether enemyOne is on
     enemyOneBool: false,
     //Boolean variable for whether enemyTwo is on
@@ -117,6 +119,8 @@ let gooseInfo = {
     alive: false,
     //Variable for deciding on whether the goose should be made alive right now
     gooseDecision: undefined,
+    //Goose chance
+    geeseChance: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     //Time variable that later defines when geese spawn
     time: 0
 }
@@ -128,9 +132,8 @@ let score = 0;
 let state = "titlescreen";
 
 let armorBool = null;
+let armorBoolRandom = [1, 2];
 let gooseArmored = false;
-
-let config;
 
 /** ----------------------------------------------------------------------------------------------------------------------------- */
 /** ----------------------------------------------------------------------------------------------------------------------------- */
@@ -157,7 +160,6 @@ function preload() {
     gunSound = loadSound('assets/sounds/gun.mp3');
     gooseSound = loadSound('assets/sounds/goose.m4a');
     tingSound = loadSound('assets/sounds/ting.m4a');
-    config = loadJSON('js/config.json');
 }
 
 //Setup runs code on start-up
@@ -372,11 +374,10 @@ function gooseSpawnDecide() {
     //Checks whether enough time has past for another attempt
     if (gooseInfo.time >= 1) {
         //Randomized pick from an array of 10 choices, worked better for me than a number randomizer
-        gooseInfo.gooseDecision = random(config.settings.gooseInfo.geeseChance);
-        console.log("Goose Decision = " + gooseInfo.gooseDecision);
+        gooseInfo.gooseDecision = random(gooseInfo.geeseChance);
         //Checks if the choice made is 1 AND the goose is not alive
         if (gooseInfo.gooseDecision === 1 && gooseInfo.alive === false) {
-            armorBool = Math.floor(random(config.settings.armorBoolChance));
+            armorBool = Math.floor(random(armorBoolRandom));
             console.log("Randomized Armor Chance is set to " + armorBool);
             if (armorBool === 1) {
                 gooseArmored = true;
@@ -474,7 +475,7 @@ function enemyStart() {
     //Checks if the enemy time is over or equal to 1
     if (enemyInfo.time >= 1) {
         //Picks a random value from an array and assigns it to enemyJump
-        enemyInfo.enemyJump = random(config.settings.enemyInfo.enemy);
+        enemyInfo.enemyJump = random(enemyInfo.enemy);
         //Checks if enemyjump is 1 AND enemyOneBool is false
         if (enemyInfo.enemyJump === 1 && enemyInfo.enemyOneBool === false) {
             enemyInfo.enemyOneBool = true;
