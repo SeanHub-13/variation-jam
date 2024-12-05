@@ -1,27 +1,24 @@
 {
-    "settings": {
-        "_comment1": "Recommended sizes: 0.8, 1, 1.2",
-        "gooseInfo": {
-            "geeseChance": [
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10
-            ]
-        },
-        "_comment2": "Recommended sizes: 0.8, 1, 1.2",
-        "armorBoolChance": [
+    "gooseInfo": {
+        "geeseChance": [
             1,
-            2
-        ],
-        "_comment3": "Recommended sizes: 0.8, 1, 1.2",
-        "textSizeMultiplier": 1,
-        "volumeMultiplier": 1
-    }
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+        ]
+    },
+    "armorBoolChance": [
+        1,
+        2
+    ],
+    "textSizeMultiplier": 1,
+    "volumeMultiplier": 1,
+    "offSetValue": 100,
+    "ammo": 6
 }
