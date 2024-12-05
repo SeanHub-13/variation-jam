@@ -1,11 +1,6 @@
 {
     "settings": {
-        "enemyInfo": {
-            "enemy": [
-                1,
-                2
-            ]
-        },
+        "_comment1": "Recommended sizes: 0.8, 1, 1.2",
         "gooseInfo": {
             "geeseChance": [
                 1,
@@ -20,9 +15,13 @@
                 10
             ]
         },
+        "_comment2": "Recommended sizes: 0.8, 1, 1.2",
         "armorBoolChance": [
             1,
             2
-        ]
+        ],
+        "_comment3": "Recommended sizes: 0.8, 1, 1.2",
+        "textSizeMultiplier": 1,
+        "volumeMultiplier": 1
     }
 }
