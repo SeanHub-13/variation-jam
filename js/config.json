@@ -1,0 +1,56 @@
+{
+    "assets": {
+        "images": {
+            "target": "assets/images/Target.png",
+            "jam": "assets/images/Art_Jam.png",
+            "jamScared": "assets/images/Art_Jam_Scared.png",
+            "button": "assets/images/Art_Jam_Button_1.png",
+            "buttonPressed": "assets/images/Art_Jam_Button_2.png",
+            "explosionSmall": "assets/images/Repurposed_Art_Jam_Explosion_1.png",
+            "explosionMedium": "assets/images/Repurposed_Art_Jam_Explosion_2.png",
+            "explosionLarge": "assets/images/Repurposed_Art_Jam_Explosion_3.png",
+            "rifle": "assets/images/Art_Jam_Rifle.png",
+            "gooseUp": "assets/images/Goose_1.png",
+            "gooseDown": "assets/images/Goose_2.png",
+            "endGoose": "assets/images/End_Goose.png"
+        },
+        "fonts": {
+            "title": "assets/fonts/PressStart2P-Regular.ttf"
+        },
+        "sounds": {
+            "paint": "assets/sounds/paint.mp3",
+            "explosion": "assets/sounds/explode.mp3",
+            "gun": "assets/sounds/gun.mp3",
+            "goose": "assets/sounds/goose.m4a",
+            "ting": "assets/sounds/ting.m4a"
+        }
+    },
+    "settings": {
+        "canvas": {
+            "width": 800,
+            "height": 800
+        },
+        "grassFront": {
+            "x": 0,
+            "y": 650,
+            "width": 800,
+            "height": 150,
+            "fill": {
+                "r": 100,
+                "g": 225,
+                "b": 50
+            }
+        },
+        "grassBack": {
+            "x": 0,
+            "y": 550,
+            "width": 800,
+            "height": 150,
+            "fill": {
+                "r": 200,
+                "g": 225,
+                "b": 50
+            }
+        }
+    }
+}
