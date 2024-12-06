@@ -115,9 +115,17 @@ let gooseInfo = {
 
 let hasClicked = false;
 
-let currentDamage = null;
-
 let sam = null;
+
+let brainwashingInfo = {
+    textX: null,
+    textY: null,
+    showText: false,
+    duckGotThrough: false,
+    spacebarPressed: false,
+    pickDuckBrainwashing: null,
+    pickSpacebarBrainwashing: null
+}
 
 //Variable holding the score
 let score = 0;
@@ -126,6 +134,7 @@ let score = 0;
 let state = "titlescreen";
 
 let config;
+let brainwashing;
 
 /** ----------------------------------------------------------------------------------------------------------------------------- */
 /** ----------------------------------------------------------------------------------------------------------------------------- */
@@ -149,6 +158,7 @@ function preload() {
     gooseSound = loadSound('assets/sounds/goose.m4a');
     tingSound = loadSound('assets/sounds/ting.m4a');
     config = loadJSON('js/config.json');
+    brainwashing = loadJSON('js/brainwashing.json');
 }
 
 //Setup runs code on start-up
@@ -162,7 +172,6 @@ function setup() {
     //Makes text white
     fill("white");
     sam = new SamJs(config.saMK);
-    currentDamage = config.minDamage;
     gooseInfo.gooseChangingImage = gooseUpImage;
     //Sets an interval that triggers all one second interval dependant things
     setInterval(oneSecondIntervals, 1000);
@@ -191,17 +200,10 @@ function draw() {
 }
 
 function keyPressed() {
-    if (keyCode === 32 && currentDamage === config.minDamage) {
-        currentDamage = config.midDamage;
-        sam.speak("Damage: Me-dium");
-    }
-    else if (keyCode === 32 && currentDamage === config.midDamage) {
-        currentDamage = config.maxDamage;
-        sam.speak("Damage: Maximum");
-    }
-    else if (keyCode === 32 && currentDamage === config.maxDamage) {
-        currentDamage = config.minDamage;
-        sam.speak("Damage: Minimum");
+    if (keyCode === 32) {
+        brainwashingInfo.showText = true;
+        brainwashingInfo.spacebarPressed = true;
+        sam.speak("Do not resist.");
     }
 }
 
@@ -245,8 +247,8 @@ function titleScreenText() {
     push();
     fill("#ffffff");
     textSize(config.textSizeMultiplier * 38);
-    text("!Termigeese!", width / 2, height / 3 + 60);
-    text("Fear The", width / 2, height / 3);
+    text(".MKGoosetra.", width / 2, height / 3 + 60);
+    text("Don't Resist", width / 2, height / 3);
     pop();
 }
 
@@ -256,13 +258,10 @@ function gameExplainText() {
     push();
     fill("#ffffff");
     textSize(config.textSizeMultiplier * 12);
-    text("You travelled far into the apocalyptic future!", width / 2, height - 325);
-    text("Defend the last survivors with your railgun!", width / 2, height - 300);
-    text("The railgun has 3 damage modes, 1, 2, and 4.", width / 2, height - 275);
-    text("They each take as much ammo as they do damage.", width / 2, height - 250);
-    text("Luckily, you have S.A.M to assist you!", width / 2, height - 225);
-    text("But beware the Termigoose, a terror with 6 health!", width / 2, height - 200);
-    text("(Sam and Termigoose are a little loud)", width / 2, height - 175);
+    text("You can't fight this.", width / 2, height - 325);
+    text("These ducks are cute and friendly.", width / 2, height - 300);
+    text("Let's let them through and take our medicine.", width / 2, height - 275);
+    text("We know what’s best.", width / 2, height - 250);
     pop();
 }
 
@@ -282,8 +281,36 @@ function endText() {
     push();
     fill("#ffffff");
     textSize(config.textSizeMultiplier * 24);
-    text("You let the geese destroy earth.", width / 2, height / 4);
+    text("Don't. Touch. The. Ducks.", width / 2, height / 4);
     pop();
+}
+
+function drawRandomBrainwashing() {
+    if (brainwashingInfo.showText === true && brainwashingInfo.duckGotThrough === true) {
+        randomBrainwashing();
+        push();
+        fill(255);
+        textSize(24);
+        text(brainwashingInfo.pickDuckBrainwashing, brainwashingInfo.textX, brainwashingInfo.textY);
+        pop();
+    }
+    else if (brainwashingInfo.showText === true && brainwashingInfo.spacebarPressed === true) {
+        randomBrainwashing();
+        push();
+        fill(255);
+        textSize(24);
+        text(brainwashingInfo.pickSpacebarBrainwashing, brainwashingInfo.textX, brainwashingInfo.textY);
+        pop();
+    }
+}
+
+function randomBrainwashing() {
+    brainwashingInfo.pickDuckBrainwashing = random(brainwashing.ducksMissed);
+    brainwashingInfo.pickSpacebarBrainwashing = random(brainwashing.spacebarTriggered);
+    brainwashingInfo.textX = random(30, width - 30);
+    brainwashingInfo.textY = random(30, height - 30);
+    brainwashingInfo.showText = true;
+    setTimeout(() => { brainwashingInfo.showText = false, brainwashingInfo.duckGotThrough = false, brainwashingInfo.spacebarPressed = false }, 3000);
 }
 
 //Draws a rifle on the right end of the screen when called
@@ -320,9 +347,9 @@ function shootHandler() {
             (mouseY < gooseInfo.y + gooseInfo.height)) {
             gooseInfo.alive = false;
             gooseInfo.x = 0;
-            tingSound.setVolume(config.volumeMultiplier * 0.2);
-            tingSound.play();
-            score = score + 3;
+            sam.speak("Give, in.")
+            //Just changing the state to end here
+            state = "end";
         }
         //Checks if mouse is over the jam
         else if ((mouseX > width / 3 - artJam.width) &&
@@ -368,9 +395,11 @@ function drawGoose() {
     if (gooseInfo.x > width + gooseInfo.width) {
         gooseInfo.alive = false;
         gooseInfo.x = 0;
-        sam.speak("Give, in.")
-        //Just changing the state to end here
-        state = "end";
+        score = score + 3;
+        tingSound.setVolume(config.volumeMultiplier * 0.15);
+        tingSound.play();
+        brainwashingInfo.showText = true;
+        brainwashingInfo.duckGotThrough = true;
     }
 }
 
@@ -496,7 +525,6 @@ function playButtonInput() {
         if (mouseIsPressed) {
             //Resets score
             score = 0;
-            sam.speak("Malfunction. Erro-er-er-er-er-er-er-er. Sys-tems On-line.");
             state = "game";
         }
     }
@@ -538,6 +566,7 @@ function game() {
     gooseSpawnDecide()
     enemyStart();
     scoreText();
+    drawRandomBrainwashing();
 }
 
 /** ----------------------------------------------------------------------------------------------------------------------------- */
