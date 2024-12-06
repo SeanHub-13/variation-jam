@@ -10,13 +10,13 @@
             "mouth": 152,
             "throat": 142
         },
-        "health": 10
+        "health": 6
     },
     "sam": {
-        "speed": 95,
-        "pitch": 171,
-        "mouth": 117,
-        "throat": 129
+        "speed": 72,
+        "pitch": 64,
+        "mouth": 128,
+        "throat": 128
     },
     "armorBoolChance": [
         1,

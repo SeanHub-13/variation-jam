@@ -23,7 +23,10 @@ let buttonPressedImage = undefined;
 let explosionSmallImage = undefined;
 let explosionMediumImage = undefined;
 let explosionLargeImage = undefined;
-let crossbowImage = undefined;
+let railgunMinImage = undefined;
+let railgunMidImage = undefined;
+let railgunMaxImage = undefined;
+let railgunImage = undefined;
 let gooseUpImage = undefined;
 let gooseDownImage = undefined;
 let gooseBossUpImage = undefined;
@@ -146,6 +149,9 @@ let maxAmmo = null;
 
 let currentDamage = null;
 
+let sam = null;
+let bossQuack = null;
+
 //Variable holding the score
 let score = 0;
 
@@ -169,7 +175,9 @@ function preload() {
     explosionSmallImage = loadImage('assets/images/Repurposed_Art_Jam_Explosion_1.png');
     explosionMediumImage = loadImage('assets/images/Repurposed_Art_Jam_Explosion_2.png');
     explosionLargeImage = loadImage('assets/images/Repurposed_Art_Jam_Explosion_3.png');
-    crossbowImage = loadImage('assets/images/Art_Jam_Crossbow.png');
+    railgunMinImage = loadImage('assets/images/Art_Jam_Railgun_1.png');
+    railgunMidImage = loadImage('assets/images/Art_Jam_Railgun_2.png');
+    railgunMaxImage = loadImage('assets/images/Art_Jam_Railgun_3.png');
     gooseUpImage = loadImage('assets/images/Goose_1.png');
     gooseDownImage = loadImage('assets/images/Goose_2.png');
     gooseBossUpImage = loadImage('assets/images/Goose_Boss_1.png');
@@ -195,6 +203,8 @@ function setup() {
     textFont(titleFont);
     //Makes text white
     fill("white");
+    sam = new SamJs(config.sam);
+    bossQuack = new SamJs(config.bossGooseInfo.bossQuack);
     currentDamage = config.minDamage;
     gooseInfo.gooseChangingImage = gooseUpImage;
     bossGooseInfo.bossGooseChangingImage = gooseBossUpImage;
@@ -228,14 +238,20 @@ function draw() {
 function keyPressed() {
     if (keyCode === 32 && currentDamage === config.minDamage) {
         currentDamage = config.midDamage;
+        railgunImage = railgunMidImage;
+        sam.speak("Damage: Me-dium");
         console.log(currentDamage);
     }
     else if (keyCode === 32 && currentDamage === config.midDamage) {
         currentDamage = config.maxDamage;
+        railgunImage = railgunMaxImage;
+        sam.speak("Damage: Maximum");
         console.log(currentDamage);
     }
     else if (keyCode === 32 && currentDamage === config.maxDamage) {
         currentDamage = config.minDamage;
+        railgunImage = railgunMinImage;
+        sam.speak("Damage: Minimum");
         console.log(currentDamage);
     }
 }
@@ -280,8 +296,8 @@ function titleScreenText() {
     push();
     fill("#ffffff");
     textSize(config.textSizeMultiplier * 38);
-    text("!Goose Shootout!", width / 2, height / 3 + 60);
-    text("Ye Olde", width / 2, height / 3);
+    text("!Termigeese!", width / 2, height / 3 + 60);
+    text("Fear The", width / 2, height / 3);
     pop();
 }
 
@@ -291,11 +307,13 @@ function gameExplainText() {
     push();
     fill("#ffffff");
     textSize(config.textSizeMultiplier * 12);
-    text("You travelled far into the past!", width / 2, height - 325);
-    text("Defend Canada with your trusty crossbow!", width / 2, height - 300);
-    text("Your crossbow aims lower than your cursor, and watch your ammo!", width / 2, height - 275);
-    text("Armoured geese take 2 hits to defeat!", width / 2, height - 250);
-    text("Scoring doesn't reduce ammo (you grab the bolts)!", width / 2, height - 225);
+    text("You travelled far into the apocalyptic future!", width / 2, height - 325);
+    text("Defend the last survivors with your railgun!", width / 2, height - 300);
+    text("The railgun has 3 damage modes, 1, 2, and 4.", width / 2, height - 275);
+    text("They each take as much ammo as they do damage.", width / 2, height - 250);
+    text("Luckily, you have S.A.M to assist you!", width / 2, height - 225);
+    text("But beware the Termigoose, a terror with 6 health!", width / 2, height - 200);
+    text("(Sam and Termigoose are a little loud)", width / 2, height - 175);
     pop();
 }
 
@@ -303,7 +321,7 @@ function gameExplainText() {
 function scoreText() {
     //Changes all text settings to preferred settings for a scoreboard, then draws the text based on canvas sizes
     push();
-    fill("#ffffff");
+    fill("#5fc9df");
     textSize(config.textSizeMultiplier * 24);
     text("Score: " + score, width / 2, height / 3);
     pop();
@@ -313,7 +331,7 @@ function scoreText() {
 function ammoText() {
     //Changes all text settings to preferred settings for a scoreboard, then draws the text based on canvas sizes
     push();
-    fill("#ffffff");
+    fill("#5fc9df");
     textSize(config.textSizeMultiplier * 24);
     text("Ammo: " + config.ammo, width / 8, height / 1.1);
     pop();
@@ -325,7 +343,7 @@ function endText() {
     push();
     fill("#ffffff");
     textSize(config.textSizeMultiplier * 24);
-    text("You let the geese invade Canada", width / 2, height / 4);
+    text("You let the geese destroy earth.", width / 2, height / 4);
     pop();
 }
 
@@ -338,7 +356,7 @@ function drawRifle() {
     if (rifleImageHeight < 500) {
         rifleImageHeight = 500;
     }
-    image(crossbowImage, width - rifle.width, rifleImageHeight, rifle.width, rifle.height);
+    image(railgunImage, width - rifle.width, rifleImageHeight, rifle.width, rifle.height);
 }
 
 function isMousePressed() {
@@ -359,7 +377,7 @@ function shootHandler() {
     gunSound.setVolume(config.volumeMultiplier * 0.25);
     gunSound.play();
     if (state === "game") {
-        if (config.ammo > 0) {
+        if (config.ammo - currentDamage >= 0) {
             config.ammo = config.ammo - currentDamage;
             //Checks if mouse is over the goose
             if ((mouseX > gooseInfo.x - gooseInfo.width) &&
@@ -411,8 +429,10 @@ function shootHandler() {
                 tingSound.setVolume(config.volumeMultiplier * 0.15);
                 tingSound.play();
             }
-
             // console.log("Ammo = " + config.ammo);
+        }
+        else {
+            sam.speak("Ammo!");
         }
     }
 }
@@ -492,8 +512,7 @@ function gooseSpawnDecide() {
     }
     if (bossGooseInfo.bossGooseDecision === 1 && bossGooseInfo.alive === false) {
         bossGooseInfo.alive = true;
-        gooseSound.setVolume(config.volumeMultiplier * 0.25);
-        gooseSound.play();
+        bossQuack.speak("QUAAAAAAACK");
     }
     //Resets the time
     gooseInfo.time = 0;
@@ -616,8 +635,10 @@ function playButtonInput() {
         if (mouseIsPressed) {
             //Resets score
             score = 0;
+            railgunImage = railgunMinImage;
             config.ammo = maxAmmo;
             bossGooseInfo.maxHealth = config.bossGooseInfo.health;
+            sam.speak("SAM, on-line.");
             state = "game";
         }
     }
