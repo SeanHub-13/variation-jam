@@ -2,11 +2,7 @@
 
 Sean Verba
 
-## INSERT URL TO PROJECT
-## INSERT URL TO PROJECT
-## INSERT URL TO PROJECT
-## INSERT URL TO PROJECT
-[View this project online](URL_FOR_THE_RUNNING_PROJECT)
+[View this project online](https://github.com/SeanHub-13/variation-jam)
 
 ## Description
 
