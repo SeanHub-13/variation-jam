@@ -21,7 +21,8 @@ Variation 3 - A game where humanity has lost to the geese and you are brainwashe
 ## Credits
 
 This project uses [p5.js](https://p5js.org).
-This project uses Javascript port of [SAM made by Discordier](https://github.com/discordier/sam)
+
+This project uses Javascript port of [SAM made by Discordier](https://github.com/discordier/sam).
 
 ## Attribution
 
