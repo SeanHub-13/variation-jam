@@ -1,15 +1,18 @@
 /**
- * Art Jam Shootout (also evil geese)
+ * Variation Jam - Fear The: Termigeese
  * Sean Verba
  * 
- * A game where you shoot cans of Art Jam (paint) and protect Canada from a goose invasion
+ * A game where you shoot cans of Art Jam (paint) and robot geese motherships in a sad attempt to save the last of humanity
  * 
  * Control's:
  * - Mouse to adjust aim
  * - Left click to fire
+ * - Spacebar to swap weapon damage modes
  * Uses:
  * p5.js
  * https://p5js.org
+ * SAM - Software Automatic Mouth Javascript port
+ * https://github.com/discordier/sam
  */
 
 "use strict";
@@ -119,6 +122,7 @@ let gooseInfo = {
     time: 0
 }
 
+//Same as gooseInfo but for the boss
 let bossGooseInfo = {
     x: 0,
     y: 0,
@@ -130,16 +134,23 @@ let bossGooseInfo = {
     alive: false,
     //Variable for deciding on whether the goose should be made alive right now
     bossGooseDecision: undefined,
+    //Stores max health
     maxHealth: null
 }
 
+//Boolean for whether the user has their mouse down
 let hasClicked = false;
 
+//Tracks maximum ammo
 let maxAmmo = null;
 
+//Tracks the current damage the player does
 let currentDamage = null;
 
+//Represents an instance of sam
 let sam = null;
+
+//Represents another instance of sam but for the boss goose's voice
 let bossQuack = null;
 
 //Variable holding the score
@@ -189,8 +200,10 @@ function setup() {
     textFont(titleFont);
     //Makes text white
     fill("white");
+    //Defines the sam with his attributes
     sam = new SamJs(config.sam);
     bossQuack = new SamJs(config.bossGooseInfo.bossQuack);
+    //Sets starting damage at min
     currentDamage = config.minDamage;
     gooseInfo.gooseChangingImage = gooseUpImage;
     bossGooseInfo.bossGooseChangingImage = gooseBossUpImage;
@@ -221,10 +234,15 @@ function draw() {
     }
 }
 
+//On key press
 function keyPressed() {
+    //If the key pressed is the spacebar key and currentDamage is set to min
     if (keyCode === 32 && currentDamage === config.minDamage) {
+        //Set currentDamage to mid
         currentDamage = config.midDamage;
+        //Change the railgun image to match
         railgunImage = railgunMidImage;
+        //Sam talks
         sam.speak("Damage: Me-dium");
     }
     else if (keyCode === 32 && currentDamage === config.midDamage) {
@@ -292,7 +310,7 @@ function gameExplainText() {
     textSize(config.textSizeMultiplier * 12);
     text("You travelled far into the apocalyptic future!", width / 2, height - 325);
     text("Defend the last survivors with your railgun!", width / 2, height - 300);
-    text("The railgun has 3 damage modes, 1, 2, and 4.", width / 2, height - 275);
+    text("The railgun has 3 damage modes, swap with spacebar.", width / 2, height - 275);
     text("They each take as much ammo as they do damage.", width / 2, height - 250);
     text("Luckily, you have S.A.M to assist you!", width / 2, height - 225);
     text("But beware the Termigoose, a terror with 6 health!", width / 2, height - 200);
@@ -310,9 +328,8 @@ function scoreText() {
     pop();
 }
 
-//Draws the text that displays player score when called
+//Draws the text that displays player ammo when called
 function ammoText() {
-    //Changes all text settings to preferred settings for a scoreboard, then draws the text based on canvas sizes
     push();
     fill("#5fc9df");
     textSize(config.textSizeMultiplier * 24);
@@ -342,23 +359,33 @@ function drawRifle() {
     image(railgunImage, width - rifle.width, rifleImageHeight, rifle.width, rifle.height);
 }
 
+//Backbone of the mouse press re-work
 function isMousePressed() {
+    //If the mouse is pressed
     if (mouseIsPressed) {
+        //If hasClicked is set to false
         if (hasClicked === false) {
+            //Set hasClicked to true
             hasClicked = true;
+            //Then activate the shootHandler function
             shootHandler();
         }
     }
+    //Otherwise, switch hasClicked to false
     else {
         hasClicked = false;
     }
 }
 
+//Secondary part of the mouse press re-work
 function shootHandler() {
     gunSound.setVolume(config.volumeMultiplier * 0.25);
     gunSound.play();
+    //If the player is in the "game" state
     if (state === "game") {
+        //If ammo - currentDamage is more or equal to 0 (stops player from using more ammo than available)
         if (config.ammo - currentDamage >= 0) {
+            //Remove currentDamage from the ammo
             config.ammo = config.ammo - currentDamage;
             //Checks if mouse is over the goose
             if ((mouseX > gooseInfo.x - gooseInfo.width) &&
@@ -376,7 +403,9 @@ function shootHandler() {
                 (mouseX < bossGooseInfo.x) &&
                 (mouseY > bossGooseInfo.y) &&
                 (mouseY < bossGooseInfo.y + bossGooseInfo.height)) {
+                //Damage the boss based on currentDamage
                 config.bossGooseInfo.health = config.bossGooseInfo.health - currentDamage;
+                //If the boss's health is less than or equal to 0
                 if (config.bossGooseInfo.health <= 0) {
                     bossGooseInfo.alive = false;
                     config.bossGooseInfo.health = bossGooseInfo.maxHealth;
@@ -411,21 +440,26 @@ function shootHandler() {
             }
         }
         else {
+            //Sam reminds the player that they don't have enough ammo
             sam.speak("Ammo!");
         }
     }
 }
 
+//Function that sets the maximum amount of ammo
 function maxAmmoSet() {
     maxAmmo = config.ammo;
 }
 
+//Function to add ammo
 function addAmmo() {
+    //If the state is "game" and the config.ammo is less than maximum
     if (state === "game" && config.ammo < maxAmmo) {
         config.ammo++;
     }
 }
 
+//New function to condense all one second intervals
 function oneSecondIntervals() {
     enemyTimeUpdate();
     gooseTimeUpdate();
@@ -455,9 +489,9 @@ function drawGoose() {
 //Draws a goose that heads from left to right on the screen when called, and can be shot for 3 points
 function drawBossGoose() {
     bossGooseInfo.y = height / 6;
-    //Draws the goose
+    //Draws the boss goose
     image(bossGooseInfo.bossGooseChangingImage, bossGooseInfo.x - bossGooseInfo.width, height / 6, bossGooseInfo.width, bossGooseInfo.height);
-    //If the goose reaches the end of the canvas, end the game
+    //If the boss goose reaches the end of the canvas, end the game
     if (bossGooseInfo.x > width + bossGooseInfo.width) {
         bossGooseInfo.alive = false;
         bossGooseInfo.x = 0;
@@ -486,8 +520,10 @@ function gooseSpawnDecide() {
     else if (gooseInfo.gooseDecision != 1 && gooseInfo.alive === false) {
         gooseInfo.alive = false;
     }
+    //Same deal with the boss
     if (bossGooseInfo.bossGooseDecision === 1 && bossGooseInfo.alive === false) {
         bossGooseInfo.alive = true;
+        //Big goose, big quack
         bossQuack.speak("QUAAAAAAACK");
     }
     //Resets the time

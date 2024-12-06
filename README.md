@@ -1,4 +1,4 @@
-# Art Jam Shootout (also evil geese)
+# Variation Jam - The GooseWorld Trilogy
 
 Sean Verba
 
@@ -10,12 +10,19 @@ Sean Verba
 
 ## Description
 
-This is a small game where the user can click on cans of "Art Jam" (paint), in order to shoot them and gain points.
+This is a trilogy of games that follow the official storyline of GooseWorld originally started in my art jam.
+
+Variation 1 - A game where you shoot cans of Art Jam (paint) and armoured geese with a gravity effected crossbow.
+
+Variation 2 - A game where you shoot cans of Art Jam (paint) and robot geese motherships in a sad attempt to save the last of humanity.
+
+Variation 3 - A game where humanity has lost to the geese and you are brainwashed forever.
 
 ## Credits
 
 This project uses [p5.js](https://p5js.org).
+This project uses Javascript port of [SAM made by Discordier](https://github.com/discordier/sam)
 
 ## Attribution
 
-All assets sourced by me.
+All image assets sourced by me, audio by my friend Andy.

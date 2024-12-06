@@ -1,15 +1,17 @@
 /**
- * Art Jam Shootout (also evil geese)
+ * Variation Jam - Ye Olde: Goose Shootout
  * Sean Verba
  * 
- * A game where you shoot cans of Art Jam (paint) and protect Canada from a goose invasion
+ * A game where you shoot cans of Art Jam (paint) and armoured geese with a gravity effected crossbow
  * 
  * Control's:
- * - Mouse to adjust aim
+ * - Mouse to adjust aim, see offset bar for where the mouse will click
  * - Left click to fire
  * Uses:
  * p5.js
  * https://p5js.org
+ * SAM - Software Automatic Mouth Javascript port
+ * https://github.com/discordier/sam
  */
 
 "use strict";
@@ -116,8 +118,10 @@ let gooseInfo = {
     time: 0
 }
 
+//Boolean for whether the user has their mouse down
 let hasClicked = false;
 
+//Tracks maximum ammo
 let maxAmmo = null;
 
 //Variable holding the score
@@ -126,9 +130,15 @@ let score = 0;
 //State variable, currently set to titlescreen on launch
 let state = "titlescreen";
 
+//Value that tracks whether a goose will or won't spawn with armor, 2 states only
 let armorBool = null;
+
+//Boolean that tracks whether a goose currently is armored or not
 let gooseArmored = false;
+//Will later represent the offset of the mouses click
 let mouseYOffset = null;
+
+//Json variable
 let config;
 
 /** ----------------------------------------------------------------------------------------------------------------------------- */
@@ -137,7 +147,7 @@ let config;
 
 //A function that preloads all the assets used
 function preload() {
-    //Variables are getting image data
+    //Variables are getting data
     targetImage = loadImage('assets/images/Target.png');
     targetOffsetImage = loadImage('assets/images/Target_Offset.png');
     jamImage = loadImage('assets/images/Art_Jam.png');
@@ -169,10 +179,8 @@ function setup() {
     //Makes text white
     fill("white");
     gooseInfo.gooseChangingImage = gooseUpImage;
-    //Sets an interval for every 1 second that triggers the enemy time update function
-    setInterval(enemyTimeUpdate, 1000);
-    //Sets an interval for every 1 second that triggers the goose time update function
-    setInterval(gooseTimeUpdate, 1000);
+    //Sets an interval that triggers all one second interval dependant things
+    setInterval(oneSecondIntervals, 1000);
     //Sets an interval for every 0.25 of a second that makes the goose flap its wings
     setInterval(changeGoose, 250);
 }
@@ -228,7 +236,9 @@ function drawFrontGrass() {
     pop();
 }
 
+//Draws the offset marker for the crossbow cursor
 function drawOffsetMarker() {
+    //Maps the Y Offset of the mouse, Offset value is configurable
     mouseYOffset = map(mouseY, height, 0, mouseY, mouseY + config.offSetValue);
     image(targetOffsetImage, mouseX - 16, mouseYOffset - 16, 32, 32);
 }
@@ -305,34 +315,47 @@ function drawRifle() {
     image(crossbowImage, width - rifle.width, rifleImageHeight, rifle.width, rifle.height);
 }
 
+//Backbone of the mouse press re-work
 function isMousePressed() {
+    //If the mouse is pressed
     if (mouseIsPressed) {
+        //If hasClicked is set to false
         if (hasClicked === false) {
+            //Set hasClicked to true
             hasClicked = true;
+            //Then activate the shootHandler function
             shootHandler();
         }
     }
+    //Otherwise, switch hasClicked to false
     else {
         hasClicked = false;
     }
 }
 
+//Secondary part of the mouse press re-work
 function shootHandler() {
     gunSound.setVolume(config.volumeMultiplier * 0.25);
     gunSound.play();
+    //If the player is in the "game" state
     if (state === "game") {
+        //If ammo is more than 0
         if (config.ammo > 0) {
-            //Checks if mouse is over the goose
+            //If mouse is over the goose
             if ((mouseX > gooseInfo.x - gooseInfo.width) &&
                 (mouseX < gooseInfo.x) &&
                 (mouseYOffset > gooseInfo.y) &&
                 (mouseYOffset < gooseInfo.y + gooseInfo.height)) {
+                //If the goose is armored
                 if (gooseArmored === true) {
+                    //Remove the armor
                     gooseArmored = false;
                     tingSound.setVolume(config.volumeMultiplier * 0.2);
                     tingSound.play();
                 }
+                //If the goose is not armored
                 else if (gooseArmored === false) {
+                    //Set it to not be alive
                     gooseInfo.alive = false;
                     gooseInfo.x = 0;
                     tingSound.setVolume(config.volumeMultiplier * 0.2);
@@ -340,7 +363,7 @@ function shootHandler() {
                     score = score + 3;
                 }
             }
-            //Checks if mouse is over the jam
+            //Check if mouse is over the jam
             else if ((mouseX > width / 3 - artJam.width) &&
                 (mouseX < width / 3) &&
                 (mouseYOffset > height - artJam.height - enemyInfo.artJamRow + artJam.jamRange) &&
@@ -363,6 +386,7 @@ function shootHandler() {
                 tingSound.setVolume(config.volumeMultiplier * 0.15);
                 tingSound.play();
             }
+            //If no enemy was shot, remove ammo
             else {
                 config.ammo = config.ammo - 1;
             }
@@ -373,8 +397,15 @@ function shootHandler() {
     }
 }
 
+//Function that sets the maximum amount of ammo
 function maxAmmoSet() {
     maxAmmo = config.ammo;
+}
+
+//New function to condense all one second intervals
+function oneSecondIntervals() {
+    enemyTimeUpdate();
+    gooseTimeUpdate();
 }
 
 /** ----------------------------------------------------------------------------------------------------------------------------- */
@@ -386,7 +417,9 @@ function drawGoose() {
     gooseInfo.y = height / 8;
     //Draws the goose
     image(gooseInfo.gooseChangingImage, gooseInfo.x - gooseInfo.width, height / 8, gooseInfo.width, gooseInfo.height);
+    //If the goose is armored
     if (gooseArmored === true) {
+        //Draw the armor on the goose
         image(gooseArmorImage, gooseInfo.x - gooseInfo.width, height / 8, gooseInfo.width, gooseInfo.height);
     }
     //If the goose reaches the end of the canvas, end the game

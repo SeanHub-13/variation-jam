@@ -1,15 +1,18 @@
 /**
- * Art Jam Shootout (also evil geese)
+ * Variation Jam - Don't Resist: MKGoosetra
  * Sean Verba
  * 
- * A game where you shoot cans of Art Jam (paint) and protect Canada from a goose invasion
+ * A game where humanity has lost to the geese and you are brainwashed forever
  * 
  * Control's:
  * - Mouse to adjust aim
  * - Left click to fire
+ * - Space to attempt to free yourself
  * Uses:
  * p5.js
  * https://p5js.org
+ * SAM - Software Automatic Mouth Javascript port
+ * https://github.com/discordier/sam
  */
 
 "use strict";
@@ -113,10 +116,13 @@ let gooseInfo = {
     time: 0
 }
 
+//Boolean for whether the user has their mouse down
 let hasClicked = false;
 
+//Represents an instance of sam
 let sam = null;
 
+//All the info for brainwashing functions
 let brainwashingInfo = {
     textX: null,
     textY: null,
@@ -199,10 +205,14 @@ function draw() {
     }
 }
 
+//On key press
 function keyPressed() {
     if (keyCode === 32) {
+        //Sets show text to true, activating brainwashing function
         brainwashingInfo.showText = true;
+        //Sets the brainwashing to use the spacebar array of choices
         brainwashingInfo.spacebarPressed = true;
+        //Sam is turned to the dark side
         sam.speak("Do not resist.");
     }
 }
@@ -285,7 +295,9 @@ function endText() {
     pop();
 }
 
+//This function is called in draw() so that if showText is ever true it triggers
 function drawRandomBrainwashing() {
+    //If showText is true and a duck got through
     if (brainwashingInfo.showText === true && brainwashingInfo.duckGotThrough === true) {
         randomBrainwashing();
         push();
@@ -294,6 +306,7 @@ function drawRandomBrainwashing() {
         text(brainwashingInfo.pickDuckBrainwashing, brainwashingInfo.textX, brainwashingInfo.textY);
         pop();
     }
+    //If showText is true and the player pressed space
     else if (brainwashingInfo.showText === true && brainwashingInfo.spacebarPressed === true) {
         randomBrainwashing();
         push();
@@ -304,12 +317,17 @@ function drawRandomBrainwashing() {
     }
 }
 
+//The main brainwashing function, only activated by the one in draw when a "brainwash" is needed
 function randomBrainwashing() {
+    //Picks random quotes from the json files duck missing section
     brainwashingInfo.pickDuckBrainwashing = random(brainwashing.ducksMissed);
+    //Picks random quotes from the json files spacebar section
     brainwashingInfo.pickSpacebarBrainwashing = random(brainwashing.spacebarTriggered);
+    //Gets random X positions for the text while giving it a small border
     brainwashingInfo.textX = random(30, width - 30);
+    //Gets random Y positions for the text while giving it a small border
     brainwashingInfo.textY = random(30, height - 30);
-    brainwashingInfo.showText = true;
+    //Timeout that resets every boolean that messes with the brainwashing
     setTimeout(() => { brainwashingInfo.showText = false, brainwashingInfo.duckGotThrough = false, brainwashingInfo.spacebarPressed = false }, 3000);
 }
 
