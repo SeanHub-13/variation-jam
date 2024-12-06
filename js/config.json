@@ -1,17 +1,22 @@
 {
     "gooseInfo": {
-        "geeseChance": [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10
-        ]
+        "geeseChance": 10
+    },
+    "bossGooseInfo": {
+        "bossGeeseChance": 15,
+        "bossQuack": {
+            "speed": 95,
+            "pitch": 156,
+            "mouth": 152,
+            "throat": 142
+        },
+        "health": 4
+    },
+    "sam": {
+        "speed": 95,
+        "pitch": 171,
+        "mouth": 117,
+        "throat": 129
     },
     "armorBoolChance": [
         1,
@@ -20,5 +25,8 @@
     "textSizeMultiplier": 1,
     "volumeMultiplier": 1,
     "offSetValue": 100,
-    "ammo": 6
+    "ammo": 6,
+    "maxDamage": 4,
+    "midDamage": 2,
+    "lowDamage": 1
 }

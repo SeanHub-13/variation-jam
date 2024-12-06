@@ -423,8 +423,8 @@ function drawGoose() {
 function gooseSpawnDecide() {
     //Checks whether enough time has past for another attempt
     if (gooseInfo.time >= 1) {
-        //Randomized pick from an array of 10 choices, worked better for me than a number randomizer
-        gooseInfo.gooseDecision = random(config.gooseInfo.geeseChance);
+        //Randomized pick
+        gooseInfo.gooseDecision = Math.floor(random(1, config.gooseInfo.geeseChance));
         // console.log("Goose Decision = " + gooseInfo.gooseDecision);
         //Checks if the choice made is 1 AND the goose is not alive
         if (gooseInfo.gooseDecision === 1 && gooseInfo.alive === false) {
