@@ -21,9 +21,6 @@ let jamImage = undefined;
 let jamScaredImage = undefined;
 let buttonImage = undefined;
 let buttonPressedImage = undefined;
-let explosionSmallImage = undefined;
-let explosionMediumImage = undefined;
-let explosionLargeImage = undefined;
 let crossbowImage = undefined;
 let gooseUpImage = undefined;
 let gooseDownImage = undefined;
@@ -79,12 +76,6 @@ let artJam = {
     width: 120,
     height: 168,
     jamRange: undefined
-}
-
-//Variables that tell the explosion at the cursor what size to be  (currently not really functional)
-let explosion = {
-    width: 48,
-    height: 38
 }
 
 //Variables for the evil end goose's size
@@ -153,9 +144,6 @@ function preload() {
     jamScaredImage = loadImage('assets/images/Art_Jam_Scared.png');
     buttonImage = loadImage('assets/images/Art_Jam_Button_1.png');
     buttonPressedImage = loadImage('assets/images/Art_Jam_Button_2.png');
-    explosionSmallImage = loadImage('assets/images/Repurposed_Art_Jam_Explosion_1.png');
-    explosionMediumImage = loadImage('assets/images/Repurposed_Art_Jam_Explosion_2.png');
-    explosionLargeImage = loadImage('assets/images/Repurposed_Art_Jam_Explosion_3.png');
     crossbowImage = loadImage('assets/images/Art_Jam_Crossbow.png');
     gooseUpImage = loadImage('assets/images/Goose_1.png');
     gooseDownImage = loadImage('assets/images/Goose_2.png');
@@ -321,7 +309,6 @@ function isMousePressed() {
     if (mouseIsPressed) {
         if (hasClicked === false) {
             hasClicked = true;
-            // console.log("test")
             shootHandler();
         }
     }
@@ -346,8 +333,6 @@ function shootHandler() {
                     tingSound.play();
                 }
                 else if (gooseArmored === false) {
-                    //Explosion image I decided not to implement cuz delaying things caused problems and I wanted to make sure the functionality felt nice first, will add another time so I won't remove this right now
-                    image(explosionLargeImage, mouseX - explosion.width / 2, mouseY - explosion.height / 2, 0, 0);
                     gooseInfo.alive = false;
                     gooseInfo.x = 0;
                     tingSound.setVolume(config.volumeMultiplier * 0.2);
@@ -361,8 +346,6 @@ function shootHandler() {
                 (mouseYOffset > height - artJam.height - enemyInfo.artJamRow + artJam.jamRange) &&
                 (mouseYOffset < height - grassFront.height) &&
                 enemyInfo.enemyOneBool === true) {
-                //Explosion image I decided not to implement cuz delaying things caused problems and I wanted to make sure the functionality felt nice first, will add another time so I won't remove this right now
-                image(explosionLargeImage, mouseX - explosion.width / 2, mouseY - explosion.height / 2, 0, 0);
                 //Turns off the enemy
                 enemyInfo.enemyOneBool = false;
                 //Adds 1 to the score
@@ -375,7 +358,6 @@ function shootHandler() {
                 (mouseYOffset > height - artJam.height - enemyInfo.artJamRow + artJam.jamRange) &&
                 (mouseYOffset < height - grassFront.height) &&
                 enemyInfo.enemyTwoBool === true) {
-                image(explosionLargeImage, mouseX - explosion.width / 2, mouseY - explosion.height / 2, 0, 0);
                 enemyInfo.enemyTwoBool = false;
                 score++;
                 tingSound.setVolume(config.volumeMultiplier * 0.15);
@@ -384,7 +366,6 @@ function shootHandler() {
             else {
                 config.ammo = config.ammo - 1;
             }
-            // console.log("Ammo = " + config.ammo);
         }
         else {
 
@@ -425,21 +406,17 @@ function gooseSpawnDecide() {
     if (gooseInfo.time >= 1) {
         //Randomized pick
         gooseInfo.gooseDecision = Math.floor(random(1, config.gooseInfo.geeseChance));
-        // console.log("Goose Decision = " + gooseInfo.gooseDecision);
         //Checks if the choice made is 1 AND the goose is not alive
         if (gooseInfo.gooseDecision === 1 && gooseInfo.alive === false) {
             armorBool = Math.floor(random(config.armorBoolChance));
-            // console.log("Randomized Armor Chance is set to " + armorBool);
             if (armorBool === 1) {
                 gooseArmored = true;
-                // console.log("Goose Armored = " + gooseArmored);
                 gooseInfo.alive = true;
                 gooseSound.setVolume(config.volumeMultiplier * 0.25);
                 gooseSound.play();
             }
             else {
                 gooseArmored = false;
-                // console.log("Goose Armored = " + gooseArmored);
                 gooseInfo.alive = true;
                 gooseSound.setVolume(config.volumeMultiplier * 0.25);
                 gooseSound.play();
@@ -448,7 +425,6 @@ function gooseSpawnDecide() {
         //Checks if the choice made is anything but 1 AND the goose is not alive
         else if (gooseInfo.gooseDecision != 1 && gooseInfo.alive === false) {
             gooseInfo.alive = false;
-            //console.log("Dead");
         }
         //Resets the time
         gooseInfo.time = 0;

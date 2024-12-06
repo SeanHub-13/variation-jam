@@ -16,18 +16,12 @@
 
 //Next few variables are all undefined image variables in preperation for the preload function
 let targetImage = undefined;
-let targetOffsetImage = undefined;
 let jamImage = undefined;
-let jamScaredImage = undefined;
 let buttonImage = undefined;
 let buttonPressedImage = undefined;
-let explosionSmallImage = undefined;
-let explosionMediumImage = undefined;
-let explosionLargeImage = undefined;
-let crossbowImage = undefined;
+let spoonImage = undefined;
 let gooseUpImage = undefined;
 let gooseDownImage = undefined;
-let gooseArmorImage = undefined;
 let endGooseImage = undefined;
 let titleFont = undefined;
 let paintSound = undefined;
@@ -43,9 +37,9 @@ let grassFront = {
     width: 800,
     height: 150,
     fill: {
-        r: 100,
+        r: 110,
         g: 225,
-        b: 50
+        b: 160
     }
 }
 
@@ -56,9 +50,9 @@ let grassBack = {
     width: 800,
     height: 150,
     fill: {
-        r: 200,
+        r: 210,
         g: 225,
-        b: 50
+        b: 160
     }
 }
 
@@ -79,12 +73,6 @@ let artJam = {
     width: 120,
     height: 168,
     jamRange: undefined
-}
-
-//Variables that tell the explosion at the cursor what size to be  (currently not really functional)
-let explosion = {
-    width: 48,
-    height: 38
 }
 
 //Variables for the evil end goose's size
@@ -127,7 +115,9 @@ let gooseInfo = {
 
 let hasClicked = false;
 
-let maxAmmo = null;
+let currentDamage = null;
+
+let sam = null;
 
 //Variable holding the score
 let score = 0;
@@ -135,9 +125,6 @@ let score = 0;
 //State variable, currently set to titlescreen on launch
 let state = "titlescreen";
 
-let armorBool = null;
-let gooseArmored = false;
-let mouseYOffset = null;
 let config;
 
 /** ----------------------------------------------------------------------------------------------------------------------------- */
@@ -148,18 +135,12 @@ let config;
 function preload() {
     //Variables are getting image data
     targetImage = loadImage('assets/images/Target.png');
-    targetOffsetImage = loadImage('assets/images/Target_Offset.png');
-    jamImage = loadImage('assets/images/Art_Jam.png');
-    jamScaredImage = loadImage('assets/images/Art_Jam_Scared.png');
+    jamImage = loadImage('assets/images/Art_Jam_Ultra.png');
     buttonImage = loadImage('assets/images/Art_Jam_Button_1.png');
     buttonPressedImage = loadImage('assets/images/Art_Jam_Button_2.png');
-    explosionSmallImage = loadImage('assets/images/Repurposed_Art_Jam_Explosion_1.png');
-    explosionMediumImage = loadImage('assets/images/Repurposed_Art_Jam_Explosion_2.png');
-    explosionLargeImage = loadImage('assets/images/Repurposed_Art_Jam_Explosion_3.png');
-    crossbowImage = loadImage('assets/images/Art_Jam_Crossbow.png');
-    gooseUpImage = loadImage('assets/images/Goose_1.png');
-    gooseDownImage = loadImage('assets/images/Goose_2.png');
-    gooseArmorImage = loadImage('assets/images/Goose_Armor.png');
+    spoonImage = loadImage('assets/images/Art_Jam_Spoon.png');
+    gooseUpImage = loadImage('assets/images/Duck_1.png');
+    gooseDownImage = loadImage('assets/images/Duck_2.png');
     endGooseImage = loadImage('assets/images/End_Goose.png');
     titleFont = loadFont('assets/fonts/PressStart2P-Regular.ttf');
     paintSound = loadSound('assets/sounds/paint.mp3');
@@ -180,15 +161,14 @@ function setup() {
     textFont(titleFont);
     //Makes text white
     fill("white");
+    sam = new SamJs(config.saMK);
+    currentDamage = config.minDamage;
     gooseInfo.gooseChangingImage = gooseUpImage;
-    //Sets an interval for every 1 second that triggers the enemy time update function
-    setInterval(enemyTimeUpdate, 1000);
-    //Sets an interval for every 1 second that triggers the goose time update function
-    setInterval(gooseTimeUpdate, 1000);
+    //Sets an interval that triggers all one second interval dependant things
+    setInterval(oneSecondIntervals, 1000);
     //Sets an interval for every 0.25 of a second that makes the goose flap its wings
     setInterval(changeGoose, 250);
 }
-
 
 //Draw runs code every frame
 function draw() {
@@ -196,7 +176,7 @@ function draw() {
     drawBackdrop();
     //Cursor image didn't fully work with the preload function, seems thats because its a p5 thing maybe?
     //Makes player cursor into a target
-    cursor("assets/images/Target.png", 16, 16);
+    cursor("assets/images/Target_Peace.png", 16, 16);
     isMousePressed();
     //Checks what state the game is supposed to be in and changes it
     if (state === "titlescreen") {
@@ -204,10 +184,24 @@ function draw() {
     }
     else if (state === "game") {
         game();
-        drawOffsetMarker();
     }
     else if (state === "end") {
         end();
+    }
+}
+
+function keyPressed() {
+    if (keyCode === 32 && currentDamage === config.minDamage) {
+        currentDamage = config.midDamage;
+        sam.speak("Damage: Me-dium");
+    }
+    else if (keyCode === 32 && currentDamage === config.midDamage) {
+        currentDamage = config.maxDamage;
+        sam.speak("Damage: Maximum");
+    }
+    else if (keyCode === 32 && currentDamage === config.maxDamage) {
+        currentDamage = config.minDamage;
+        sam.speak("Damage: Minimum");
     }
 }
 
@@ -217,7 +211,7 @@ function draw() {
 
 //Draws a backround when called
 function drawBackdrop() {
-    background(200, 200, 255)
+    background(255, 150, 150)
 }
 
 //Draws the grass rectangle in the back when called
@@ -240,11 +234,6 @@ function drawFrontGrass() {
     pop();
 }
 
-function drawOffsetMarker() {
-    mouseYOffset = map(mouseY, height, 0, mouseY, mouseY + config.offSetValue);
-    image(targetOffsetImage, mouseX - 16, mouseYOffset - 16, 32, 32);
-}
-
 //Draws the evil mean goose that appears after the game ends
 function drawEndGoose() {
     image(endGooseImage, 0, height - endGoose.height, endGoose.width, endGoose.height);
@@ -256,8 +245,8 @@ function titleScreenText() {
     push();
     fill("#ffffff");
     textSize(config.textSizeMultiplier * 38);
-    text("!Goose Shootout!", width / 2, height / 3 + 60);
-    text("Ye Olde", width / 2, height / 3);
+    text("!Termigeese!", width / 2, height / 3 + 60);
+    text("Fear The", width / 2, height / 3);
     pop();
 }
 
@@ -267,11 +256,13 @@ function gameExplainText() {
     push();
     fill("#ffffff");
     textSize(config.textSizeMultiplier * 12);
-    text("You travelled far into the past!", width / 2, height - 325);
-    text("Defend Canada with your trusty crossbow!", width / 2, height - 300);
-    text("Your crossbow aims lower than your cursor, and watch your ammo!", width / 2, height - 275);
-    text("Armoured geese take 2 hits to defeat!", width / 2, height - 250);
-    text("Scoring doesn't reduce ammo (you grab the bolts)!", width / 2, height - 225);
+    text("You travelled far into the apocalyptic future!", width / 2, height - 325);
+    text("Defend the last survivors with your railgun!", width / 2, height - 300);
+    text("The railgun has 3 damage modes, 1, 2, and 4.", width / 2, height - 275);
+    text("They each take as much ammo as they do damage.", width / 2, height - 250);
+    text("Luckily, you have S.A.M to assist you!", width / 2, height - 225);
+    text("But beware the Termigoose, a terror with 6 health!", width / 2, height - 200);
+    text("(Sam and Termigoose are a little loud)", width / 2, height - 175);
     pop();
 }
 
@@ -285,23 +276,13 @@ function scoreText() {
     pop();
 }
 
-//Draws the text that displays player score when called
-function ammoText() {
-    //Changes all text settings to preferred settings for a scoreboard, then draws the text based on canvas sizes
-    push();
-    fill("#ffffff");
-    textSize(config.textSizeMultiplier * 24);
-    text("Ammo: " + config.ammo, width / 8, height / 1.1);
-    pop();
-}
-
 //Draws the end text when called
 function endText() {
     //Changes all text settings to preferred settings for a finishing message, then draws the text based on canvas sizes
     push();
     fill("#ffffff");
     textSize(config.textSizeMultiplier * 24);
-    text("You let the geese invade Canada", width / 2, height / 4);
+    text("You let the geese destroy earth.", width / 2, height / 4);
     pop();
 }
 
@@ -314,14 +295,13 @@ function drawRifle() {
     if (rifleImageHeight < 500) {
         rifleImageHeight = 500;
     }
-    image(crossbowImage, width - rifle.width, rifleImageHeight, rifle.width, rifle.height);
+    image(spoonImage, width - rifle.width, rifleImageHeight, rifle.width, rifle.height);
 }
 
 function isMousePressed() {
     if (mouseIsPressed) {
         if (hasClicked === false) {
             hasClicked = true;
-            // console.log("test")
             shootHandler();
         }
     }
@@ -331,69 +311,48 @@ function isMousePressed() {
 }
 
 function shootHandler() {
-    gunSound.setVolume(config.volumeMultiplier * 0.25);
-    gunSound.play();
     if (state === "game") {
-        if (config.ammo > 0) {
-            //Checks if mouse is over the goose
-            if ((mouseX > gooseInfo.x - gooseInfo.width) &&
-                (mouseX < gooseInfo.x) &&
-                (mouseYOffset > gooseInfo.y) &&
-                (mouseYOffset < gooseInfo.y + gooseInfo.height)) {
-                if (gooseArmored === true) {
-                    gooseArmored = false;
-                    tingSound.setVolume(config.volumeMultiplier * 0.2);
-                    tingSound.play();
-                }
-                else if (gooseArmored === false) {
-                    //Explosion image I decided not to implement cuz delaying things caused problems and I wanted to make sure the functionality felt nice first, will add another time so I won't remove this right now
-                    image(explosionLargeImage, mouseX - explosion.width / 2, mouseY - explosion.height / 2, 0, 0);
-                    gooseInfo.alive = false;
-                    gooseInfo.x = 0;
-                    tingSound.setVolume(config.volumeMultiplier * 0.2);
-                    tingSound.play();
-                    score = score + 3;
-                }
-            }
-            //Checks if mouse is over the jam
-            else if ((mouseX > width / 3 - artJam.width) &&
-                (mouseX < width / 3) &&
-                (mouseYOffset > height - artJam.height - enemyInfo.artJamRow + artJam.jamRange) &&
-                (mouseYOffset < height - grassFront.height) &&
-                enemyInfo.enemyOneBool === true) {
-                //Explosion image I decided not to implement cuz delaying things caused problems and I wanted to make sure the functionality felt nice first, will add another time so I won't remove this right now
-                image(explosionLargeImage, mouseX - explosion.width / 2, mouseY - explosion.height / 2, 0, 0);
-                //Turns off the enemy
-                enemyInfo.enemyOneBool = false;
-                //Adds 1 to the score
-                score++;
-                tingSound.setVolume(0.15);
-                tingSound.play();
-            }
-            else if ((mouseX > width / 3 + width / 2 - artJam.width) &&
-                (mouseX < width / 3 + width / 2) &&
-                (mouseYOffset > height - artJam.height - enemyInfo.artJamRow + artJam.jamRange) &&
-                (mouseYOffset < height - grassFront.height) &&
-                enemyInfo.enemyTwoBool === true) {
-                image(explosionLargeImage, mouseX - explosion.width / 2, mouseY - explosion.height / 2, 0, 0);
-                enemyInfo.enemyTwoBool = false;
-                score++;
-                tingSound.setVolume(config.volumeMultiplier * 0.15);
-                tingSound.play();
-            }
-            else {
-                config.ammo = config.ammo - 1;
-            }
-            // console.log("Ammo = " + config.ammo);
-        }
-        else {
 
+        //Checks if mouse is over the goose
+        if ((mouseX > gooseInfo.x - gooseInfo.width) &&
+            (mouseX < gooseInfo.x) &&
+            (mouseY > gooseInfo.y) &&
+            (mouseY < gooseInfo.y + gooseInfo.height)) {
+            gooseInfo.alive = false;
+            gooseInfo.x = 0;
+            tingSound.setVolume(config.volumeMultiplier * 0.2);
+            tingSound.play();
+            score = score + 3;
+        }
+        //Checks if mouse is over the jam
+        else if ((mouseX > width / 3 - artJam.width) &&
+            (mouseX < width / 3) &&
+            (mouseY > height - artJam.height - enemyInfo.artJamRow + artJam.jamRange) &&
+            (mouseY < height - grassFront.height) &&
+            enemyInfo.enemyOneBool === true) {
+            //Turns off the enemy
+            enemyInfo.enemyOneBool = false;
+            //Adds 1 to the score
+            score++;
+            tingSound.setVolume(0.15);
+            tingSound.play();
+        }
+        else if ((mouseX > width / 3 + width / 2 - artJam.width) &&
+            (mouseX < width / 3 + width / 2) &&
+            (mouseY > height - artJam.height - enemyInfo.artJamRow + artJam.jamRange) &&
+            (mouseY < height - grassFront.height) &&
+            enemyInfo.enemyTwoBool === true) {
+            enemyInfo.enemyTwoBool = false;
+            score++;
+            tingSound.setVolume(config.volumeMultiplier * 0.15);
+            tingSound.play();
         }
     }
 }
 
-function maxAmmoSet() {
-    maxAmmo = config.ammo;
+function oneSecondIntervals() {
+    enemyTimeUpdate();
+    gooseTimeUpdate();
 }
 
 /** ----------------------------------------------------------------------------------------------------------------------------- */
@@ -405,15 +364,11 @@ function drawGoose() {
     gooseInfo.y = height / 8;
     //Draws the goose
     image(gooseInfo.gooseChangingImage, gooseInfo.x - gooseInfo.width, height / 8, gooseInfo.width, gooseInfo.height);
-    if (gooseArmored === true) {
-        image(gooseArmorImage, gooseInfo.x - gooseInfo.width, height / 8, gooseInfo.width, gooseInfo.height);
-    }
     //If the goose reaches the end of the canvas, end the game
     if (gooseInfo.x > width + gooseInfo.width) {
         gooseInfo.alive = false;
         gooseInfo.x = 0;
-        explosionSound.setVolume(config.volumeMultiplier * 0.25);
-        explosionSound.play();
+        sam.speak("Give, in.")
         //Just changing the state to end here
         state = "end";
     }
@@ -424,36 +379,22 @@ function gooseSpawnDecide() {
     //Checks whether enough time has past for another attempt
     if (gooseInfo.time >= 1) {
         //Randomized pick from an array of 10 choices, worked better for me than a number randomizer
-        gooseInfo.gooseDecision = random(config.gooseInfo.geeseChance);
-        // console.log("Goose Decision = " + gooseInfo.gooseDecision);
+        gooseInfo.gooseDecision = Math.floor(random(1, config.gooseInfo.geeseChance));
         //Checks if the choice made is 1 AND the goose is not alive
         if (gooseInfo.gooseDecision === 1 && gooseInfo.alive === false) {
-            armorBool = Math.floor(random(config.armorBoolChance));
-            // console.log("Randomized Armor Chance is set to " + armorBool);
-            if (armorBool === 1) {
-                gooseArmored = true;
-                // console.log("Goose Armored = " + gooseArmored);
-                gooseInfo.alive = true;
-                gooseSound.setVolume(config.volumeMultiplier * 0.25);
-                gooseSound.play();
-            }
-            else {
-                gooseArmored = false;
-                // console.log("Goose Armored = " + gooseArmored);
-                gooseInfo.alive = true;
-                gooseSound.setVolume(config.volumeMultiplier * 0.25);
-                gooseSound.play();
-            }
+            gooseInfo.alive = true;
+            gooseSound.setVolume(config.volumeMultiplier * 0.25);
+            gooseSound.play();
         }
-        //Checks if the choice made is anything but 1 AND the goose is not alive
-        else if (gooseInfo.gooseDecision != 1 && gooseInfo.alive === false) {
-            gooseInfo.alive = false;
-            //console.log("Dead");
-        }
-        //Resets the time
-        gooseInfo.time = 0;
     }
+    //Checks if the choice made is anything but 1 AND the goose is not alive
+    else if (gooseInfo.gooseDecision != 1 && gooseInfo.alive === false) {
+        gooseInfo.alive = false;
+    }
+    //Resets the time
+    gooseInfo.time = 0;
 }
+
 
 //Swaps between the goose images
 function changeGoose() {
@@ -463,7 +404,6 @@ function changeGoose() {
     else {
         gooseInfo.gooseChangingImage = gooseUpImage
     }
-
 }
 
 //Adds 1 to the goose time variable when called
@@ -483,8 +423,6 @@ function enemyOne() {
         (mouseX < width / 3) &&
         (mouseY > height - artJam.height - enemyInfo.artJamRow + artJam.jamRange) &&
         (mouseY < height - grassFront.height)) {
-        //Draws a scared jam picture if hovered over
-        image(jamScaredImage, width / 3 - artJam.width, height - artJam.height - enemyInfo.artJamRow + artJam.jamRange, artJam.width, artJam.height);
     }
 }
 
@@ -496,7 +434,6 @@ function enemyTwo() {
         (mouseX < width / 3 + width / 2) &&
         (mouseY > height - artJam.height - enemyInfo.artJamRow + artJam.jamRange) &&
         (mouseY < height - grassFront.height)) {
-        image(jamScaredImage, width / 3 + width / 2 - artJam.width, height - artJam.height - enemyInfo.artJamRow + artJam.jamRange, artJam.width, artJam.height);
     }
 }
 
@@ -511,16 +448,10 @@ function enemyStart() {
         //Checks if enemyjump is 1 AND enemyOneBool is false
         if (enemyInfo.enemyJump === 1 && enemyInfo.enemyOneBool === false) {
             enemyInfo.enemyOneBool = true;
-            //Triggers the "paintSound"
-            paintSound.setVolume(config.volumeMultiplier * 0.1);
-            paintSound.play();
         }
         //Checks if enemyjump is 2 AND enemyTwoBool is false
         else if (enemyInfo.enemyJump === 2 && enemyInfo.enemyTwoBool === false) {
             enemyInfo.enemyTwoBool = true;
-            //Triggers the "paintSound"
-            paintSound.setVolume(config.volumeMultiplier * 0.1);
-            paintSound.play();
         }
         //Resets enemy time
         enemyInfo.time = 0;
@@ -565,7 +496,7 @@ function playButtonInput() {
         if (mouseIsPressed) {
             //Resets score
             score = 0;
-            config.ammo = maxAmmo;
+            sam.speak("Malfunction. Erro-er-er-er-er-er-er-er. Sys-tems On-line.");
             state = "game";
         }
     }
@@ -581,7 +512,6 @@ function titleScreen() {
     drawPlayButton();
     playButtonInput();
     gameExplainText();
-    maxAmmoSet();
 }
 
 /** ----------------------------------------------------------------------------------------------------------------------------- */
@@ -607,7 +537,6 @@ function game() {
     drawRifle();
     gooseSpawnDecide()
     enemyStart();
-    ammoText();
     scoreText();
 }
 

@@ -20,9 +20,6 @@ let jamImage = undefined;
 let jamScaredImage = undefined;
 let buttonImage = undefined;
 let buttonPressedImage = undefined;
-let explosionSmallImage = undefined;
-let explosionMediumImage = undefined;
-let explosionLargeImage = undefined;
 let railgunMinImage = undefined;
 let railgunMidImage = undefined;
 let railgunMaxImage = undefined;
@@ -31,7 +28,6 @@ let gooseUpImage = undefined;
 let gooseDownImage = undefined;
 let gooseBossUpImage = undefined;
 let gooseBossDownImage = undefined;
-let gooseForceImage = undefined;
 let endGooseImage = undefined;
 let titleFont = undefined;
 let paintSound = undefined;
@@ -83,12 +79,6 @@ let artJam = {
     width: 120,
     height: 168,
     jamRange: undefined
-}
-
-//Variables that tell the explosion at the cursor what size to be  (currently not really functional)
-let explosion = {
-    width: 48,
-    height: 38
 }
 
 //Variables for the evil end goose's size
@@ -172,9 +162,6 @@ function preload() {
     jamScaredImage = loadImage('assets/images/Art_Jam_Scared.png');
     buttonImage = loadImage('assets/images/Art_Jam_Button_1.png');
     buttonPressedImage = loadImage('assets/images/Art_Jam_Button_2.png');
-    explosionSmallImage = loadImage('assets/images/Repurposed_Art_Jam_Explosion_1.png');
-    explosionMediumImage = loadImage('assets/images/Repurposed_Art_Jam_Explosion_2.png');
-    explosionLargeImage = loadImage('assets/images/Repurposed_Art_Jam_Explosion_3.png');
     railgunMinImage = loadImage('assets/images/Art_Jam_Railgun_1.png');
     railgunMidImage = loadImage('assets/images/Art_Jam_Railgun_2.png');
     railgunMaxImage = loadImage('assets/images/Art_Jam_Railgun_3.png');
@@ -182,7 +169,6 @@ function preload() {
     gooseDownImage = loadImage('assets/images/Goose_2.png');
     gooseBossUpImage = loadImage('assets/images/Goose_Boss_1.png');
     gooseBossDownImage = loadImage('assets/images/Goose_Boss_2.png');
-    gooseForceImage = loadImage('assets/images/Goose_Force.png');
     endGooseImage = loadImage('assets/images/End_Goose.png');
     titleFont = loadFont('assets/fonts/PressStart2P-Regular.ttf');
     paintSound = loadSound('assets/sounds/paint.mp3');
@@ -240,19 +226,16 @@ function keyPressed() {
         currentDamage = config.midDamage;
         railgunImage = railgunMidImage;
         sam.speak("Damage: Me-dium");
-        console.log(currentDamage);
     }
     else if (keyCode === 32 && currentDamage === config.midDamage) {
         currentDamage = config.maxDamage;
         railgunImage = railgunMaxImage;
         sam.speak("Damage: Maximum");
-        console.log(currentDamage);
     }
     else if (keyCode === 32 && currentDamage === config.maxDamage) {
         currentDamage = config.minDamage;
         railgunImage = railgunMinImage;
         sam.speak("Damage: Minimum");
-        console.log(currentDamage);
     }
 }
 
@@ -363,7 +346,6 @@ function isMousePressed() {
     if (mouseIsPressed) {
         if (hasClicked === false) {
             hasClicked = true;
-            // console.log("test")
             shootHandler();
         }
     }
@@ -373,7 +355,6 @@ function isMousePressed() {
 }
 
 function shootHandler() {
-    console.log("Damaged boss by to " + config.bossGooseInfo.health + " health.")
     gunSound.setVolume(config.volumeMultiplier * 0.25);
     gunSound.play();
     if (state === "game") {
@@ -396,7 +377,6 @@ function shootHandler() {
                 (mouseY > bossGooseInfo.y) &&
                 (mouseY < bossGooseInfo.y + bossGooseInfo.height)) {
                 config.bossGooseInfo.health = config.bossGooseInfo.health - currentDamage;
-                console.log("Damaged boss by to " + config.bossGooseInfo.health + " health.")
                 if (config.bossGooseInfo.health <= 0) {
                     bossGooseInfo.alive = false;
                     config.bossGooseInfo.health = bossGooseInfo.maxHealth;
@@ -429,7 +409,6 @@ function shootHandler() {
                 tingSound.setVolume(config.volumeMultiplier * 0.15);
                 tingSound.play();
             }
-            // console.log("Ammo = " + config.ammo);
         }
         else {
             sam.speak("Ammo!");
@@ -496,8 +475,6 @@ function gooseSpawnDecide() {
         //Randomized pick from an array of 10 choices, worked better for me than a number randomizer
         gooseInfo.gooseDecision = Math.floor(random(1, config.gooseInfo.geeseChance));
         bossGooseInfo.bossGooseDecision = Math.floor(random(1, config.bossGooseInfo.bossGeeseChance));
-        console.log("Boss Decision = " + bossGooseInfo.bossGooseDecision);
-        // console.log("Goose Decision = " + gooseInfo.gooseDecision);
         //Checks if the choice made is 1 AND the goose is not alive
         if (gooseInfo.gooseDecision === 1 && gooseInfo.alive === false) {
             gooseInfo.alive = true;
@@ -508,7 +485,6 @@ function gooseSpawnDecide() {
     //Checks if the choice made is anything but 1 AND the goose is not alive
     else if (gooseInfo.gooseDecision != 1 && gooseInfo.alive === false) {
         gooseInfo.alive = false;
-        //console.log("Dead");
     }
     if (bossGooseInfo.bossGooseDecision === 1 && bossGooseInfo.alive === false) {
         bossGooseInfo.alive = true;
