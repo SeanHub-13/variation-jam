@@ -137,11 +137,14 @@ let bossGooseInfo = {
     alive: false,
     //Variable for deciding on whether the goose should be made alive right now
     bossGooseDecision: undefined,
+    maxHealth: null
 }
 
 let hasClicked = false;
 
 let maxAmmo = null;
+
+let currentDamage = null;
 
 //Variable holding the score
 let score = 0;
@@ -192,16 +195,15 @@ function setup() {
     textFont(titleFont);
     //Makes text white
     fill("white");
+    currentDamage = config.minDamage;
     gooseInfo.gooseChangingImage = gooseUpImage;
     bossGooseInfo.bossGooseChangingImage = gooseBossUpImage;
-    //Sets an interval for every 1 second that triggers the enemy time update function
-    setInterval(enemyTimeUpdate, 1000);
-    //Sets an interval for every 1 second that triggers the goose time update function
-    setInterval(gooseTimeUpdate, 1000);
+    //Sets an interval that triggers all one second interval dependant things
+    setInterval(oneSecondIntervals, 1000);
     //Sets an interval for every 0.25 of a second that makes the goose flap its wings
     setInterval(changeGoose, 250);
-}
 
+}
 
 //Draw runs code every frame
 function draw() {
@@ -220,6 +222,21 @@ function draw() {
     }
     else if (state === "end") {
         end();
+    }
+}
+
+function keyPressed() {
+    if (keyCode === 32 && currentDamage === config.minDamage) {
+        currentDamage = config.midDamage;
+        console.log(currentDamage);
+    }
+    else if (keyCode === 32 && currentDamage === config.midDamage) {
+        currentDamage = config.maxDamage;
+        console.log(currentDamage);
+    }
+    else if (keyCode === 32 && currentDamage === config.maxDamage) {
+        currentDamage = config.minDamage;
+        console.log(currentDamage);
     }
 }
 
@@ -338,10 +355,12 @@ function isMousePressed() {
 }
 
 function shootHandler() {
+    console.log("Damaged boss by to " + config.bossGooseInfo.health + " health.")
     gunSound.setVolume(config.volumeMultiplier * 0.25);
     gunSound.play();
     if (state === "game") {
         if (config.ammo > 0) {
+            config.ammo = config.ammo - currentDamage;
             //Checks if mouse is over the goose
             if ((mouseX > gooseInfo.x - gooseInfo.width) &&
                 (mouseX < gooseInfo.x) &&
@@ -352,18 +371,22 @@ function shootHandler() {
                 tingSound.setVolume(config.volumeMultiplier * 0.2);
                 tingSound.play();
                 score = score + 3;
-
             }
+            //Checks if mouse is over the boss goose
             else if ((mouseX > bossGooseInfo.x - bossGooseInfo.width) &&
                 (mouseX < bossGooseInfo.x) &&
                 (mouseY > bossGooseInfo.y) &&
                 (mouseY < bossGooseInfo.y + bossGooseInfo.height)) {
-                bossGooseInfo.alive = false;
-                bossGooseInfo.x = 0;
-                tingSound.setVolume(config.volumeMultiplier * 0.2);
-                tingSound.play();
-                score = score + 6;
-
+                config.bossGooseInfo.health = config.bossGooseInfo.health - currentDamage;
+                console.log("Damaged boss by to " + config.bossGooseInfo.health + " health.")
+                if (config.bossGooseInfo.health <= 0) {
+                    bossGooseInfo.alive = false;
+                    config.bossGooseInfo.health = bossGooseInfo.maxHealth;
+                    bossGooseInfo.x = 0;
+                    tingSound.setVolume(config.volumeMultiplier * 0.2);
+                    tingSound.play();
+                    score = score + 6;
+                }
             }
             //Checks if mouse is over the jam
             else if ((mouseX > width / 3 - artJam.width) &&
@@ -383,25 +406,31 @@ function shootHandler() {
                 (mouseY > height - artJam.height - enemyInfo.artJamRow + artJam.jamRange) &&
                 (mouseY < height - grassFront.height) &&
                 enemyInfo.enemyTwoBool === true) {
-                // config.bossGooseInfo.health = config.bossGooseInfo.health - currentDamage;
                 enemyInfo.enemyTwoBool = false;
                 score++;
                 tingSound.setVolume(config.volumeMultiplier * 0.15);
                 tingSound.play();
             }
-            else {
-                config.ammo = config.ammo - 1;
-            }
-            // console.log("Ammo = " + config.ammo);
-        }
-        else {
 
+            // console.log("Ammo = " + config.ammo);
         }
     }
 }
 
 function maxAmmoSet() {
     maxAmmo = config.ammo;
+}
+
+function addAmmo() {
+    if (state === "game" && config.ammo < maxAmmo) {
+        config.ammo++;
+    }
+}
+
+function oneSecondIntervals() {
+    enemyTimeUpdate();
+    gooseTimeUpdate();
+    addAmmo();
 }
 
 /** ----------------------------------------------------------------------------------------------------------------------------- */
@@ -588,6 +617,7 @@ function playButtonInput() {
             //Resets score
             score = 0;
             config.ammo = maxAmmo;
+            bossGooseInfo.maxHealth = config.bossGooseInfo.health;
             state = "game";
         }
     }
